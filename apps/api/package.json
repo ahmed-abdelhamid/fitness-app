@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nest build",
-    "dev": "nest start --watch",
+    "build": "nest build && tsc-alias -p tsconfig.json",
+    "dev": "bun --watch src/main.ts",
     "start": "nest start",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
