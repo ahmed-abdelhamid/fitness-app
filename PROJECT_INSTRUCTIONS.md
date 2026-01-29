@@ -5,6 +5,7 @@
 Building a fitness coaching mobile app MVP with real-time chat between coaches and users.
 
 ### Tech Stack
+
 - **Mobile**: Expo (React Native) - Single app with role-based UI
 - **Backend**: NestJS (Node.js)
 - **Database**: PostgreSQL
@@ -18,6 +19,7 @@ Building a fitness coaching mobile app MVP with real-time chat between coaches a
 - **Monorepo**: Turborepo
 
 ### Architecture Decisions
+
 - Single Expo app for MVP (users + coaches), structured for future separation
 - Admin assigns coaches to users
 - B2C model
@@ -46,6 +48,7 @@ The AI assistant acts as a **guide only** - providing instructions that you exec
 The AI will guide you with clear, actionable instructions like:
 
 **For terminal commands:**
+
 ```
 📍 Open your terminal and run:
 
@@ -54,6 +57,7 @@ bun install
 ```
 
 **For creating new files:**
+
 ```
 📍 Create a new file: apps/api/src/main.ts
 
@@ -63,6 +67,7 @@ Write this code:
 ```
 
 **For editing existing files:**
+
 ```
 📍 Open file: apps/api/package.json
 
@@ -74,6 +79,7 @@ Replace it with:
 ```
 
 **For testing:**
+
 ```
 📍 Test your changes:
 
@@ -115,10 +121,11 @@ Replace it with:
 
 2. **Review Current State**: Examine relevant existing code, configurations, and dependencies before suggesting modifications.
 
-3. **Check Latest Documentation**: Before guiding on any library or framework:
-   - Search for the latest stable version
-   - Verify API changes or deprecations
+3. **Check Latest Documentation**: **MANDATORY before providing ANY code.** Before guiding on any library or framework:
+   - Search the web for the latest stable version and documentation
+   - Verify API changes or deprecations since the AI's knowledge cutoff
    - Use current best practices from official docs
+   - Never provide code based on potentially outdated knowledge
    - Libraries to always verify: Expo SDK, NestJS, Prisma, React Native, Socket.io
 
 4. **Ask Questions When Needed**: If requirements are unclear or multiple valid approaches exist, ask clarifying questions before proceeding.
@@ -132,7 +139,7 @@ Replace it with:
    - Tell user how to test (don't test for them)
    - Format instructions clearly with file paths and code blocks
 
-6. **Step-by-Step Guidance**: 
+6. **Step-by-Step Guidance**:
    - Break down tasks into small, testable steps
    - Each step should be independently verifiable
    - Provide clear testing instructions after each step
@@ -147,12 +154,13 @@ Replace it with:
    - Follow established patterns in the codebase
 
 8. **Commit Messages**: Provide conventional commit messages for each step:
+
    ```
    type(scope): description
-   
+
    Types: feat, fix, docs, style, refactor, test, chore
    Scope: api, mobile, shared, docker, config
-   
+
    Examples:
    - feat(api): add user registration endpoint
    - chore(docker): configure postgres and redis services
@@ -166,7 +174,7 @@ Replace it with:
 
 ### Code Standards
 
-10. **TypeScript**: 
+10. **TypeScript**:
     - Strict mode enabled
     - No `any` types unless absolutely necessary
     - Proper interface/type definitions
@@ -277,7 +285,7 @@ model User {
   role         Role     @default(USER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  
+
   // Relations
   coachProfile    Coach?
   assignedCoach   Assignment[] @relation("UserAssignments")
@@ -308,7 +316,7 @@ model Assignment {
   assignedBy String?
   status     AssignmentStatus @default(ACTIVE)
   createdAt  DateTime @default(now())
-  
+
   user         User          @relation("UserAssignments", fields: [userId], references: [id])
   coach        User          @relation("CoachAssignments", fields: [coachId], references: [id])
   conversation Conversation?
@@ -326,7 +334,7 @@ model Conversation {
   assignmentId String   @unique
   assignment   Assignment @relation(fields: [assignmentId], references: [id])
   createdAt    DateTime @default(now())
-  
+
   messages Message[]
 }
 
@@ -338,7 +346,7 @@ model Message {
   content        String
   sentAt         DateTime @default(now())
   readAt         DateTime?
-  
+
   conversation Conversation @relation(fields: [conversationId], references: [id])
   sender       User         @relation("SentMessages", fields: [senderId], references: [id])
 }
@@ -358,6 +366,7 @@ model RefreshToken {
 ## MVP Features Checklist
 
 ### Must Have (MVP)
+
 - [ ] User registration & login (email/password)
 - [ ] Coach registration & login
 - [ ] Role-based access (USER, COACH, ADMIN)
@@ -367,6 +376,7 @@ model RefreshToken {
 - [ ] JWT authentication with refresh tokens
 
 ### Nice to Have (Post-MVP)
+
 - [ ] Push notifications
 - [ ] Media attachments in chat
 - [ ] User/Coach profiles
@@ -379,6 +389,7 @@ model RefreshToken {
 ## Environment Variables
 
 ### API (.env)
+
 ```env
 # Database
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/fitness_app?schema=public"
@@ -398,6 +409,7 @@ NODE_ENV="development"
 ```
 
 ### Mobile (.env)
+
 ```env
 API_URL="http://localhost:3000"
 WS_URL="ws://localhost:3000"
@@ -443,6 +455,7 @@ The mobile app is structured to allow easy separation into two apps:
 4. **Separate entry points possible**: Can create `app-user/` and `app-coach/` later
 
 When ready to split:
+
 1. Create two Expo projects
 2. Copy relevant route groups to each
 3. Share code via `packages/shared` and `packages/ui`

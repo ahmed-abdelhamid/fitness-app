@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "prettier": "^3.8.1",
+    "tsc-alias": "^1.8.16",
     "turbo": "^2.7.6",
     "typescript": "5.9.3"
   },
