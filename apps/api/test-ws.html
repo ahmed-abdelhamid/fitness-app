@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+  <head>
+    <title>WebSocket Chat Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h1>WebSocket Chat Test</h1>
+
+    <div>
+      <label>Access Token:</label><br />
+      <textarea
+        id="token"
+        rows="3"
+        cols="80"
+        placeholder="Paste your JWT access token here"
+      ></textarea>
+    </div>
+
+    <div style="margin-top: 10px">
+      <label>Conversation ID:</label><br />
+      <input
+        type="text"
+        id="conversationId"
+        placeholder="Paste conversation ID"
+        style="width: 400px"
+      />
+    </div>
+
+    <div style="margin-top: 10px">
+      <button onclick="connect()">Connect</button>
+      <button onclick="disconnect()">Disconnect</button>
+    </div>
+
+    <div style="margin-top: 20px">
+      <label>Message:</label><br />
+      <input
+        type="text"
+        id="message"
+        placeholder="Type a message"
+        style="width: 400px"
+      />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <div style="margin-top: 20px">
+      <h3>Events Log:</h3>
+      <div
+        id="log"
+        style="
+          border: 1px solid #ccc;
+          padding: 10px;
+          height: 300px;
+          overflow-y: auto;
+          font-family: monospace;
+        "
+      ></div>
+    </div>
+
+    <script>
+      let socket = null;
+
+      function log(message) {
+        const logDiv = document.getElementById("log");
+        const time = new Date().toLocaleTimeString();
+        logDiv.innerHTML += `[${time}] ${message}<br>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+
+      function connect() {
+        const token = document.getElementById("token").value.trim();
+        if (!token) {
+          alert("Please enter an access token");
+          return;
+        }
+
+        socket = io("http://localhost:3000/chat", {
+          auth: { token },
+        });
+
+        socket.on("connect", () => {
+          log("✅ Connected! Socket ID: " + socket.id);
+
+          // Join conversation if ID provided
+          const convId = document.getElementById("conversationId").value.trim();
+          if (convId) {
+            socket.emit(
+              "join_conversation",
+              { conversationId: convId },
+              (response) => {
+                log("Join conversation response: " + JSON.stringify(response));
+              },
+            );
+          }
+        });
+
+        socket.on("connect_error", (error) => {
+          log("❌ Connection error: " + error.message);
+        });
+
+        socket.on("disconnect", (reason) => {
+          log("🔌 Disconnected: " + reason);
+        });
+
+        socket.on("new_message", (data) => {
+          log("📨 New message: " + JSON.stringify(data));
+        });
+
+        socket.on("typing_start", (data) => {
+          log("✍️ Typing start: " + JSON.stringify(data));
+        });
+
+        socket.on("typing_stop", (data) => {
+          log("✍️ Typing stop: " + JSON.stringify(data));
+        });
+
+        socket.on("message_read", (data) => {
+          log("👁️ Message read: " + JSON.stringify(data));
+        });
+
+        socket.on("error", (data) => {
+          log("❌ Error: " + JSON.stringify(data));
+        });
+      }
+
+      function disconnect() {
+        if (socket) {
+          socket.disconnect();
+          socket = null;
+        }
+      }
+
+      function sendMessage() {
+        if (!socket || !socket.connected) {
+          alert("Not connected");
+          return;
+        }
+
+        const conversationId = document
+          .getElementById("conversationId")
+          .value.trim();
+        const content = document.getElementById("message").value.trim();
+
+        if (!conversationId || !content) {
+          alert("Please enter conversation ID and message");
+          return;
+        }
+
+        socket.emit("send_message", { conversationId, content }, (response) => {
+          log("Send message response: " + JSON.stringify(response));
+          document.getElementById("message").value = "";
+        });
+      }
+    </script>
+  </body>
+</html>
